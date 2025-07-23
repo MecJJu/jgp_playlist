@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>♪··· 정광피 Playlist ···♬</title>
+  <link rel="icon" href="./jgp.ico" type="image/x-icon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300&display=swap');
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: #fff;
+      font-family: 'Noto Sans KR', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .bg-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      filter: blur(20px) brightness(0.4);
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      z-index: -1;
+    }
+
+    .bg-image.active {
+      opacity: 1;
+    }
+
+    #audioSelect {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 6px 12px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #444;
+      background-color: #111;
+      color: #fff;
+      max-width: 250px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: 'Noto Sans KR', sans-serif;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+      transition: border-color 0.3s, background-color 0.3s;
+    }
+
+    #audioSelect:hover {
+      background-color: #1a1a1a;
+    }
+
+    #audioSelect:focus {
+      outline: none;
+      border-color: #fff;
+    }
+
+    .top-label {
+      position: fixed;
+      top: 26px;
+      right: 290px;
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    .bg-label {
+      position: fixed;
+      top: 20px;
+      left: 100px;
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    #bgToggleBtn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      font-size: 14px;
+      padding: 6px 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      background-color: #555;
+      color: #fff;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      text-align: center;
+    }
+
+    #albumImage {
+      width: 300px;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.2);
+      margin-bottom: 20px;
+    }
+
+    .scroll-title-wrapper {
+      width: 300px;
+      height: 30px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    #songTitle {
+      position: absolute;
+      white-space: nowrap;
+    }
+
+    .scroll-title {
+      position: absolute;
+      white-space: nowrap;
+      animation: scrollText 15s linear infinite;
+    }
+
+    .centered-title {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    @keyframes scrollText {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    #producer {
+      font-size: 14px;
+      color: #aaa;
+      margin-bottom: 20px;
+    }
+
+    .controls-wrapper {
+      width: 500px;
+      margin-bottom: 20px;
+      position: relative;
+      height: 48px;
+    }
+
+    .side-button {
+      font-size: 14px;
+      padding: 6px 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      position: absolute;
+      top: 0;
+    }
+
+    #randomBtn {
+      left: 0;
+    }
+
+    #autoplayToggleBtn.on {
+      background-color: #fff;
+      color: #000;
+    }
+
+    #autoplayToggleBtn.off {
+      background-color: #555;
+      color: #fff;
+    }
+
+    #autoplayToggleBtn {
+      right: 0;
+    }
+
+    .main-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .main-controls button {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .main-controls svg {
+      width: 36px;
+      height: 36px;
+      fill: white;
+    }
+
+    #bgToggleBtn.on {
+      background-color: #fff;
+      color: #000;
+    }
+
+    #bgToggleBtn.off {
+      background-color: #555;
+      color: #fff;
+    }
+
+    #progressContainer {
+      width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    #progressBar {
+      width: 100%;
+      height: 5px;
+      background-color: #444;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    #progressFill {
+      height: 100%;
+      background-color: #fff;
+      width: 0%;
+    }
+
+    #progressHandle {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 14px;
+      height: 14px;
+      background-color: #fff;
+      border-radius: 50%;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .time-display {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    #masterVolumeContainer {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 250px; /* 충분히 길게 */
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    #masterVolume {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 250px; /* 수평 슬라이더 너비 */
+      height: 6px;  /* 트랙 두께를 얇게 */
+      border-radius: 5px;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+      background: linear-gradient(to right, #fff 0%, #aaa 0%);
+    }
+
+    #masterVolume::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 6px;
+      border-radius: 5px;
+      background: transparent; /* JS가 배경 담당 */
+    }
+
+    #masterVolume::-moz-range-track {
+      width: 100%;
+      height: 6px;
+      border-radius: 5px;
+      background: transparent;
+    }
+
+    #masterVolume::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      margin-top: -4px; /* 슬라이더 중앙 정렬 */
+      position: relative;
+      z-index: 1;
+    }
+
+    #masterVolume::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+    }
+
+    #masterVolume:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+  </style>
+</head>
+<body>
+
+<img id="backgroundImageOld" class="bg-image" />
+<img id="backgroundImageNew" class="bg-image active" />
+<button id="bgToggleBtn" class="off">OFF</button>
+<span class="bg-label">배경</span>
+<span class="top-label">음악 선택</span>
+<select id="audioSelect"></select>
+
+<div class="container">
+  <img src="" alt="앨범 자켓" id="albumImage">
+  <div class="scroll-title-wrapper"><div id="songTitle"></div></div>
+  <div id="producer"></div>
+
+  <div class="controls-wrapper">
+    <button id="randomBtn" class="side-button off" style="background-color:#555; color:#fff;">RANDOM</button>
+    <div class="main-controls">
+      <button id="prevBtn"><svg viewBox="0 0 24 24"><path d="M6 19h2V5H6v14zm3.5-7l8.5 6V6l-8.5 6z"/></svg></button>
+      <button id="audioToggleBtn"><svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+      <button id="nextBtn"><svg viewBox="0 0 24 24"><path d="M16 5v14h2V5h-2zm-2.5 7L5 6v12l8.5-6z"/></svg></button>
+    </div>
+    <button id="autoplayToggleBtn" class="side-button off">AUTO</button>
+  </div>
+
+  <div id="progressContainer">
+    <div id="progressBar">
+      <div id="progressFill"></div>
+      <div id="progressHandle"></div>
+    </div>
+    <div class="time-display">
+      <span id="currentTime">00:00</span>
+      <span id="totalTime">00:00</span>
+    </div>
+  </div>
+</div>
+
+<div id="masterVolumeContainer">
+  <input
+    type="range"
+    id="masterVolume"
+    min="0"
+    max="100"
+    step="1"
+    value="100"
+  />
+</div>
+
+<script>
+  const playlist = [
+    { file: '-13°C.mp3', image: '-13°C.jpg', prod: 'peled723', title: '-13°C' },
+    { file: '13°C.mp3', image: '13°C.jpg', prod: 'peled723', title: '13°C' },
+    { file: 'Anonymous.mp3', image: 'Anonymous.jpg', prod: 'peled723', title: 'A!!! nony?!?! mous' }, //특수문자로 인한 파일명 변경
+    { file: 'Apuza (feat. Apuza Syndrome).mp3', image: 'Apuza (feat. Apuza Syndrome).jpg', prod: 'peled723, Holari Crab', title: 'Apuza (feat. Apuza Syndrome)' },
+    { file: 'BG Xmas.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: 'BG Xmas' },
+    { file: 'Brightness.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: 'Brightness' },
+    { file: 'California sou-.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: 'California sou-' },
+    { file: 'chet.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: 'chet' },
+    { file: 'Churchrock.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: 'Churchrock' },
+    { file: 'CRA$H!.mp3', image: 'CRA$H!.jpg', prod: 'peled723', title: 'CRA$H!' },
+    { file: 'dddddddd.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: 'dddddddd' },
+    { file: 'DDDDDDDDDDDD.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: 'DDDDDDDDDDDD' },
+    { file: 'Discotan.mp3', image: 'Discotan.jpg', prod: 'peled723', title: 'Discotan' },
+    { file: 'Erikson 12 to 20.mp3', image: 'Erikson 12 to 20.jpg', prod: 'peled723', title: 'Erikson 12 to 20' },
+    { file: 'hill.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: 'hill' },
+    { file: 'hiphop.mp3', image: 'hiphop.jpg', prod: 'peled723', title: 'hiphop' },
+    { file: 'In die band.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: 'In die band' },
+    { file: 'In_die_Band.mp3', image: 'In_die_Band.jpg', prod: 'peled723', title: 'In_die_Band' },
+    { file: 'Marionette.mp3', image: 'Marionette.jpg', prod: 'peled723', title: 'Marionette' },
+    { file: 'moonup moondown.mp3', image: 'moonup moondown.jpg', prod: 'peled723', title: 'moonup moondown' },
+    { file: 'Musical.mp3', image: 'default.jpg', prod: 'F! Høo, peled723, Holari Crab', title: 'Musical' },
+    { file: 'NOSORRYMOMMY KID.mp3', image: 'NOSORRYMOMMY KID.jpg', prod: 'peled723', title: 'NOSORRYMOMMY KID' },
+    { file: 'sample2.mp3', image: 'sample2.jpg', prod: 'peled723', title: 'sample2' },
+    { file: 'Thrill is Gone Phonk.mp3', image: 'Thrill is Gone Phonk.jpg', prod: 'peled723', title: 'Thrill is Gone Phonk' },
+    { file: 'Thrill is Gone Phonk (Slowed).mp3', image: 'Thrill is Gone Phonk (Slowed).jpg', prod: 'peled723', title: 'Thrill is Gone Phonk (Slowed)' },
+    { file: 'tingtang.mp3', image: 'tingtang.jpg', prod: 'peled723', title: 'tingtang' },
+    { file: 'TRACK 02.mp3', image: 'default.jpg', prod: 'F! Høo, peled723, Holari Crab', title: 'TRACK 02' },
+    { file: 'TRACK 05.mp3', image: 'default.jpg', prod: 'Holari Crab', title: 'TRACK 05' },
+    { file: 'TRACK 14.mp3', image: 'default.jpg', prod: 'Holari Crab', title: 'TRACK 14' },
+    { file: 'TRACK 15.mp3', image: 'TRACK 15.jpg', prod: 'peled723', title: 'TRACK 15' },
+    { file: 'Ugat Furgion.mp3', image: 'Ugat Furgion.jpg', prod: 'F! Høo', title: 'Ugat Furgion' },
+    { file: 'Walking Painting.mp3', image: 'Walking Painting.jpg', prod: 'peled723', title: 'Walking Painting' },
+    { file: 'whippy whippy.mp3', image: 'whippy whippy.jpg', prod: 'peled723', title: 'whippy whippy' },
+    { file: '계몽기매직상지교환영인태옥황가(啓蒙己昧地上之敎歡迎人泰玉皇歌) - ⟪대옥연교(大玉蓮敎) 포교⟫ OST Part.2.mp3', image: '계몽기매직상지교환영인태옥황가(啓蒙己昧地上之敎歡迎人泰玉皇歌) - ⟪대옥연교(大玉蓮敎) 포교⟫ OST Part.2.jpg', prod: 'peled723', title: '계몽기매직상지교환영인태옥황가(啓蒙己昧地上之敎歡迎人泰玉皇歌) - ⟪대옥연교(大玉蓮敎) 포교⟫ OST Part.2' },
+    { file: '당시발벽소옥지즉시숭배태옥황가 - Kasane Teto.mp3', image: '당시발벽소옥지즉시숭배태옥황가 - Kasane Teto.jpg', prod: 'peled723', title: '당시발벽소옥지즉시숭배태옥황가 - Kasane Teto' },
+    { file: '당시발벽소옥지즉시숭배태옥황가(當身發碧霄㓇地卽時崇拜泰玉皇歌) - ⟪대옥연교(大玉蓮敎) 숭배⟫ OST Part.3.mp3', image: '당시발벽소옥지즉시숭배태옥황가(當身發碧霄㓇地卽時崇拜泰玉皇歌) - ⟪대옥연교(大玉蓮敎) 숭배⟫ OST Part.3.jpg', prod: 'peled723', title: '당시발벽소옥지즉시숭배태옥황가(當身發碧霄㓇地卽時崇拜泰玉皇歌) - ⟪대옥연교(大玉蓮敎) 숭배⟫ OST Part.3' },
+    { file: '메께헥께beaT.mp3', image: '메께헥께beaT.jpg', prod: 'peled723', title: '메께헥께beaT' },
+    { file: '메께헥께beaT 믹스.mp3', image: '메께헥께beaT 믹스.jpg', prod: 'peled723', title: '메께헥께beaT 믹스' },
+    { file: '빨개익은 파프리카 한소끔.mp3', image: '빨개익은 파프리카 한소끔.jpg', prod: 'peled723', title: '빨개익은 파프리카 한소끔' },
+    { file: '새드가이.mp3', image: '새드가이.jpg', prod: 'Holari Crab', title: '새드가이' },
+    { file: '샘플링연습.mp3', image: '샘플링연습.jpg', prod: 'F! Høo, peled723', title: '샘플링연습' },
+    { file: '수재(殊才).mp3', image: '수재(殊才).jpg', prod: 'peled723', title: '수재(殊才)' },
+    { file: '애매한거.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: '애매한거' },
+    { file: '울렁합작 뽕짜라짝짝짝 프로젝트.mp3', image: 'default_peled723.jpg', prod: 'peled723, Holari Crab', title: '울렁합작 뽕짜라짝짝짝 프로젝트' },
+    { file: '울지마쌀티오께오께호떡지몽야로.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: '울지마쌀티오께오께호떡지몽야로' },
+    { file: '잊을수앖는이유샘플링.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: '잊을수앖는이유샘플링' },
+    { file: '쟈뉘캬쳐텨쟈.mp3', image: '쟈뉘캬쳐텨쟈.jpg', prod: 'peled723, Holari Crab', title: '쟈뉘캬쳐텨쟈' },
+    { file: '첫샘플링.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: '첫샘플링' },
+    { file: '태동.mp3', image: '태동.jpg', prod: 'peled723', title: '태동' },
+    { file: '태동(Jazz ver.).mp3', image: '태동.jpg', prod: 'peled723', title: '태동(Jazz ver.)' },
+    { file: '팔랴탸니스타 휘. 윤의 씽.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: '팔랴탸니스타 휘. 윤의 씽' },
+    { file: '행복추구권치매즉시모람태옥황가(幸福追求權侵害卽是冒濫泰玉皇歌) - ⟪대옥연교(大玉蓮敎) 입교⟫ OST Part.1.mp3', image: '행복추구권치매즉시모람태옥황가(幸福追求權侵害卽是冒濫泰玉皇歌) - ⟪대옥연교(大玉蓮敎) 입교⟫ OST Part.1.jpg', prod: 'peled723', title: '행복추구권치매즉시모람태옥황가(幸福追求權侵害卽是冒濫泰玉皇歌) - ⟪대옥연교(大玉蓮敎) 입교⟫ OST Part.1' },
+    { file: '헤에엑123아뿌따삐따쁘뚜왓띠.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: '헤에@ㅇ엑;;1;2;3;;;; 아뿌따삐따쁘뚜왓#띠;;' }, //특수문자로 인한 파일명 변경
+    { file: '占쏙옙.mp3', image: '占쏙옙.jpg', prod: 'peled723', title: '占쏙옙' },
+    { file: '占쏙옙2 (사운드 연구소).mp3', image: 'default_peled723.jpg', prod: 'peled723', title: '占쏙옙2 (사운드 연구소)' },
+    { file: '他人試食 feat. 重音テト.mp3', image: '他人試食 feat. 重音テト.jpg', prod: 'peled723', title: '他人試食 feat. 重音テト' },
+    { file: '他人試食 feat. 重音テト (simple ver.).mp3', image: '他人試食 feat. 重音テト.jpg', prod: 'peled723', title: '他人試食 feat. 重音テト (simple ver.)' },
+    { file: '胎児的観照 feat. 重音テト.mp3', image: 'default_peled723.jpg', prod: 'peled723', title: '胎児的観照 feat. 重音テト' }
+  ];
+
+  const audio = new Audio();
+  let currentIndex = 0;
+  let isPlaying = false;
+  let isAutoplay = false;
+  let isDragging = false;
+  let isRandom = false;
+
+  const audioSelect = document.getElementById('audioSelect');
+  const albumImage = document.getElementById('albumImage');
+  const songTitle = document.getElementById('songTitle');
+  const producer = document.getElementById('producer');
+  const playIcon = document.getElementById('playIcon');
+  const bgToggleBtn = document.getElementById('bgToggleBtn');
+  const backgroundImage = document.getElementById('backgroundImage');
+  const autoplayBtn = document.getElementById('autoplayToggleBtn');
+  const randomBtn = document.getElementById('randomBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const progressBar = document.getElementById('progressBar');
+  const progressFill = document.getElementById('progressFill');
+  const progressHandle = document.getElementById('progressHandle');
+  const currentTimeSpan = document.getElementById('currentTime');
+  const totalTimeSpan = document.getElementById('totalTime');
+
+  playlist.forEach((song, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = song.title;
+    audioSelect.appendChild(opt);
+  });
+
+  function loadSong(index) {
+    const song = playlist[index];
+    currentIndex = index;
+
+    audio.src = song.file;
+
+    //if (song.title === 'a') {
+    //  audio.volume = 0.45;
+    //} else if (song.title === 'b') {
+    //  audio.volume = 0.35;
+    //} else {
+    //  audio.volume = 1.0;
+    //}
+
+    albumImage.src = song.image;
+    producer.textContent = song.prod;
+    audioSelect.value = index;
+
+    const wrapper = document.querySelector('.scroll-title-wrapper');
+    songTitle.className = '';
+    songTitle.textContent = song.title;
+
+    requestAnimationFrame(() => {
+      if (songTitle.scrollWidth > wrapper.clientWidth) {
+        songTitle.textContent = song.title + '       ' + song.title;
+        songTitle.classList.add('scroll-title');
+      } else {
+        songTitle.classList.add('centered-title');
+      }
+    });
+
+    updateBackground(song.image);
+  }
+
+
+  function updateBackground(newSrc) {
+    if (!bgToggleBtn.classList.contains('on')) return;
+
+    const oldImg = document.getElementById('backgroundImageOld');
+    const newImg = document.getElementById('backgroundImageNew');
+
+    newImg.src = newSrc;
+    newImg.onload = () => {
+      newImg.classList.add('active');
+      oldImg.classList.remove('active'); 
+
+      newImg.id = 'backgroundImageOld';
+      oldImg.id = 'backgroundImageNew';
+    };
+  }
+
+
+  bgToggleBtn.addEventListener('click', () => {
+    bgToggleBtn.classList.toggle('on');
+    bgToggleBtn.classList.toggle('off');
+    bgToggleBtn.textContent = bgToggleBtn.classList.contains('on') ? 'ON' : 'OFF';
+
+    if (bgToggleBtn.classList.contains('on')) {
+      updateBackground(playlist[currentIndex].image); // 배경 적용
+    } else {
+      // 배경 OFF 시 이미지 숨기기
+      document.getElementById('backgroundImageOld').classList.remove('active');
+      document.getElementById('backgroundImageNew').classList.remove('active');
+    }
+  });
+
+
+  randomBtn.addEventListener('click', () => {
+    isRandom = !isRandom;
+    randomBtn.classList.toggle('on', isRandom);
+    randomBtn.classList.toggle('off', !isRandom);
+    randomBtn.style.backgroundColor = isRandom ? '#fff' : '#555';
+    randomBtn.style.color = isRandom ? '#000' : '#fff';
+  });
+
+  autoplayBtn.addEventListener('click', () => {
+    isAutoplay = !isAutoplay;
+    autoplayBtn.textContent = isAutoplay ? 'AUTO' : 'AUTO';
+    autoplayBtn.classList.toggle('on', isAutoplay);
+    autoplayBtn.classList.toggle('off', !isAutoplay);
+  });
+
+  function playSong() {
+    audio.play();
+    isPlaying = true;
+    playIcon.innerHTML = '<path d="M6 19h4V5H6zm8-14v14h4V5h-4z"/>';
+  }
+
+  document.getElementById('audioToggleBtn').addEventListener('click', () => {
+    if (!isPlaying) playSong();
+    else {
+      audio.pause();
+      isPlaying = false;
+      playIcon.innerHTML = '<path d="M8 5v14l11-7z" />';
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    currentIndex = isRandom ? Math.floor(Math.random() * playlist.length) : (currentIndex + 1) % playlist.length;
+    loadSong(currentIndex);
+    if (isPlaying) playSong();
+  });
+
+  prevBtn.addEventListener('click', () => {
+    currentIndex = isRandom ? Math.floor(Math.random() * playlist.length) : (currentIndex - 1 + playlist.length) % playlist.length;
+    loadSong(currentIndex);
+    if (isPlaying) playSong();
+  });
+
+  audioSelect.addEventListener('change', () => {
+    loadSong(parseInt(audioSelect.value));
+    if (isPlaying) playSong();
+  });
+
+  audio.addEventListener('ended', () => {
+    if (isAutoplay) nextBtn.click();
+    else {
+      isPlaying = false;
+      playIcon.innerHTML = '<path d="M8 5v14l11-7z" />';
+    }
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    if (!isDragging) {
+      const percent = (audio.currentTime / audio.duration) * 100;
+      progressFill.style.width = `${percent}%`;
+      progressHandle.style.left = `${percent}%`;
+      currentTimeSpan.textContent = formatTime(audio.currentTime);
+    }
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    totalTimeSpan.textContent = formatTime(audio.duration);
+  });
+
+  progressBar.addEventListener('click', e => {
+    const rect = progressBar.getBoundingClientRect();
+    const percent = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = percent * audio.duration;
+  });
+
+  progressHandle.addEventListener('mousedown', () => isDragging = true);
+  window.addEventListener('mouseup', () => isDragging = false);
+  window.addEventListener('mousemove', e => {
+    if (isDragging) {
+      const rect = progressBar.getBoundingClientRect();
+      let percent = (e.clientX - rect.left) / rect.width;
+      percent = Math.max(0, Math.min(1, percent));
+      progressFill.style.width = `${percent * 100}%`;
+      progressHandle.style.left = `${percent * 100}%`;
+      audio.currentTime = percent * audio.duration;
+    }
+  });
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60).toString().padStart(2, '0');
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  loadSong(0);
+
+  // 마스터 볼륨 슬라이더 설정
+  const masterVolumeSlider = document.getElementById('masterVolume');
+
+  // 초기 볼륨 세팅 (저장값 있으면 그걸로)
+  const savedVolume = localStorage.getItem('masterVolume');
+  if (savedVolume !== null) {
+    masterVolumeSlider.value = savedVolume * 100;
+    audio.volume = savedVolume;
+  } else {
+    masterVolumeSlider.value = 100; // 초기값 100%
+    audio.volume = 1;
+  }
+
+  // 볼륨 슬라이더 배경 업데이트 함수
+  function updateVolumeSliderBackground(value) {
+    masterVolumeSlider.style.background = `linear-gradient(to right, #fff ${value}%, #444 ${value}%)`;
+  }
+
+  // 초기 배경 업데이트
+  updateVolumeSliderBackground(masterVolumeSlider.value);
+
+  // 슬라이더 input 이벤트
+  masterVolumeSlider.addEventListener('input', () => {
+    const volumeValue = masterVolumeSlider.value;
+    audio.volume = volumeValue / 100;
+    localStorage.setItem('masterVolume', audio.volume);
+    updateVolumeSliderBackground(volumeValue);
+  });
+
+</script>
+</body>
+</html>
